@@ -441,7 +441,7 @@ class detection_node {
                 nb_legs_detected++;
             }
 
-            // nb_pts++;
+            nb_pts++;  // actually should be here - otherwise "Points should not be empty in rviz"
         }
 
         if (nb_legs_detected) {
