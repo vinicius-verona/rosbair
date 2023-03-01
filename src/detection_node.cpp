@@ -290,9 +290,10 @@ class detection_node {
                         points_dynamic++;
                     }
                 }
+                int current_cluster_size = end - start + 1;
 
-                middle_x /= (end - start + 1);
-                middle_y /= (end - start + 1);
+                middle_x /= current_cluster_size;
+                middle_y /= current_cluster_size;
 
                 // TODO - compare
                 // the previous hit is the end of the current cluster
@@ -332,7 +333,7 @@ class detection_node {
                 nb_pts++;
 
                 // increase cluster number
-                cluster_size[nb_cluster] = end - start;
+                cluster_size[nb_cluster] = current_cluster_size;
                 cluster_middle[nb_cluster] = middle;
                 cluster_dynamic[nb_cluster] =
                     100 * (int)((double)(points_dynamic) /
@@ -363,21 +364,25 @@ class detection_node {
         nb_legs_detected = 0;
 
         nb_pts = 0;
+        int sum_cluster_sizes = 0;
         for (int loop = 0; loop < nb_cluster; loop++) {
             int curr_cluster_size = cluster_size[loop];
             float min_x, max_x, min_y, max_y;
+            std::cout << "curr_cluster: " << sum_cluster_sizes << " + " << curr_cluster_size << std::endl;
             for (int i = 0; i < curr_cluster_size; i++) {
-                int index = 0;  // WARNING TODO
-                float x = current_scan[index].x;
-                float y = current_scan[index].y;
-                if (x < min_x) min_x = x;
-                if (x > max_x) max_x = x;
-                if (y < min_y) min_y = y;
-                if (y > max_y) max_y = y;
+                float x = current_scan[sum_cluster_sizes + i].x;
+                float y = current_scan[sum_cluster_sizes + i].y;
+                if (x < min_x || i == 0) min_x = x;
+                if (x > max_x || i == 0) max_x = x;
+                if (y < min_y || i == 0) min_y = y;
+                if (y > max_y || i == 0) max_y = y;
             }
+            sum_cluster_sizes += curr_cluster_size;
 
             float size_x = max_x - min_x;
             float size_y = max_y - min_y;
+
+            std::cout << "size_x: " << size_x << ", size_y: " << size_y << std::endl;
 
             // loop over all the clusters
             //      if the size of the current cluster is higher than

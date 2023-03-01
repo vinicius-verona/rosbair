@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(follow_me)
 
+# add sensor_msgs to CMAKE_PREFIX_PATH
+set(CMAKE_PREFIX_PATH ${CMAKE_PREFIX_PATH} /usr/share/sensor_msgs/cmake)
+# set(sensor_msgs_DIR /usr/share/sensor_msgs)
+
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
