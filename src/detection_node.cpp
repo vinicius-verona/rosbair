@@ -315,8 +315,10 @@ class detection_node {
             // if euclidian DISTANCE between the previous hit and the current
             // one is higher than "cluster_threshold"
             float points_dist = distancePoints(current_scan[loop], current_scan[loop - 1]);
-            
+
             if (points_dist > cluster_threshold || loop == nb_beams - 1) {
+                
+                /////////////////// LAST CHANGES MADE /////////////////// 
                 if (loop == nb_beams - 1) {
                     // The size of the cluster is the euclidean distance between the start point and end point
                     cluster_size[nb_cluster] = distancePoints(current_scan[start], current_scan[loop]);
@@ -330,7 +332,8 @@ class detection_node {
                     // we end the current cluster
                     end = loop - 1;
                 }
-
+                /////////////////////////////////////////////////////////
+                
                 // graphical display of the end of the current cluster in red
                 display[nb_pts] = current_scan[end];
 
