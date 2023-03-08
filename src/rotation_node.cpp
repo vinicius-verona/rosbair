@@ -133,6 +133,7 @@ void compute_rotation()
 
     ROS_INFO("current_orientation: %f, initial_orientation: %f", current_orientation*180/M_PI, initial_orientation*180/M_PI);
     //rotation_done = ...;
+    rotation_done = current_orientation - initial_orientation;
 
     //do not forget that rotation_done must always be between -M_PI and +M_PI
 

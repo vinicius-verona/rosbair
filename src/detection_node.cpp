@@ -264,20 +264,21 @@ class detection_node {
                 dynamic[loop] = false;
             }
 
-            if (dynamic[loop]) {
-                // ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
-                //          current_scan[loop].x, current_scan[loop].y);
+            // WARNING COMMENTED OUT LOOP PRINTING BASIC HITS
+            // if (dynamic[loop]) {
+            //     // ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
+            //     //          current_scan[loop].x, current_scan[loop].y);
 
-                // display in blue of hits that are dynamic
-                display[nb_pts] = current_scan[loop];
+            //     // display in blue of hits that are dynamic
+            //     display[nb_pts] = current_scan[loop];
 
-                colors[nb_pts].r = 0;
-                colors[nb_pts].g = 0;
-                colors[nb_pts].b = 1;
-                colors[nb_pts].a = 1.0;
+            //     colors[nb_pts].r = 0;
+            //     colors[nb_pts].g = 0;
+            //     colors[nb_pts].b = 1;
+            //     colors[nb_pts].a = 1.0;
 
-                nb_pts++;
-            }
+            //     nb_pts++;
+            // }
         }
 
     }  // detect_motion
@@ -420,18 +421,18 @@ class detection_node {
         // ROS_INFO("clustering performed");
 
         // print clusters info
-        for (int loop = 0; loop < nb_cluster; loop++) {
-            // ROS_INFO("cluster[%i] (%f, %f): size = %f", loop,
-            //          cluster_middle[loop].x, cluster_middle[loop].y,
-            //          cluster_size[loop]);
+        // for (int loop = 0; loop < nb_cluster; loop++) {
+        //     // ROS_INFO("cluster[%i] (%f, %f): size = %f", loop,
+        //     //          cluster_middle[loop].x, cluster_middle[loop].y,
+        //     //          cluster_size[loop]);
 
-            // std::cout << "cluster[" << loop << "] (" << cluster_middle[loop].x
-            // << ", " << cluster_middle[loop].y << "): size = " <<
-            // cluster_size[loop] << std::endl;
+        //     // std::cout << "cluster[" << loop << "] (" << cluster_middle[loop].x
+        //     // << ", " << cluster_middle[loop].y << "): size = " <<
+        //     // cluster_size[loop] << std::endl;
 
-            // print cluster count
-            ROS_INFO("cluster[%i] count = %i, size = %f", loop, cluster_count[loop], cluster_size[loop]);
-        }
+        //     // print cluster count
+        //     ROS_INFO("cluster[%i] count = %i, size = %f", loop, cluster_count[loop], cluster_size[loop]);
+        // }
 
     }  // perform_clustering
 

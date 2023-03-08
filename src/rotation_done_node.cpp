@@ -47,6 +47,17 @@ rotation_done_node() {
 
 }
 
+float clamp(float orientation)
+{
+    if (orientation > M_PI)
+        return orientation - 2*M_PI;
+
+    if (orientation < -M_PI)
+        return orientation + 2*M_PI;
+
+    return orientation;
+}
+
 //UPDATE: main processing
 /*//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////*/
@@ -57,9 +68,14 @@ void update() {
 
 //        if ( first )
         // initial_orientation = ...;
-        first = false;
+        if (first)
+        {
+            initial_orientation = current_orientation;
+            first = false;
+        }
 
         //rotation_done = ...;
+        rotation_done = clamp(current_orientation - initial_orientation);
 
         //do not forget that rotation_done must always be between -M_PI and +M_PI
         if ( rotation_done > M_PI )
