@@ -54,13 +54,11 @@ using namespace std;
     {                 \
     } while (0);
 
-
-
-// setvbuf(stdout, NULL, _IONBF, 0); 
+// setvbuf(stdout, NULL, _IONBF, 0);
 // std::ios::sync_with_stdio(false);
 std::vector<int> num_persons_detected;
 std::vector<int> num_legs_detected;
-int t = 0; // time tick
+int t = 0;  // time tick
 int k = -1; // lines written into csv, -1 is intentional
 
 class detection_node
@@ -229,6 +227,11 @@ public:
                 else
                 {
                     detect_motion();
+                    // we search for moving person in 4 steps
+                    perform_clustering(); // to perform clustering
+                    detect_legs();        // to detect moving legs using cluster
+                    detect_persons();     // to detect moving_person using moving legs
+                    detect_a_moving_person();
                 }
             }
             else
@@ -242,13 +245,6 @@ public:
                 stored_background = false;
             }
             previous_robot_moving = current_robot_moving;
-
-            // we search for moving person in 4 steps
-            perform_clustering(); // to perform clustering
-            detect_legs();        // to detect moving legs using cluster
-            detect_persons();     // to detect moving_person using moving legs
-                                  // detected
-            detect_a_moving_person();
 
             // graphical display of the results
             populateMarkerTopic();

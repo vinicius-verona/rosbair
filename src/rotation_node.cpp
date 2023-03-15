@@ -92,29 +92,6 @@ public:
 
         if (init_odom)
         {
-            if (first)
-            {
-                initial_orientation = current_orientation;
-                first = false;
-            }
-
-            // rotation_done = ...;
-            rotation_done = clamp(current_orientation - initial_orientation);
-
-            // do not forget that rotation_done must always be between -M_PI and +M_PI
-            if (rotation_done > M_PI)
-            {
-                ROS_WARN("rotation_done > 180 degrees: %f degrees -> %f degrees", rotation_done * 180 / M_PI, (rotation_done - 2 * M_PI) * 180 / M_PI);
-                rotation_done -= 2 * M_PI;
-            }
-            else if (rotation_done < -M_PI)
-            {
-                ROS_WARN("rotation_done < -180 degrees: %f degrees -> %f degrees", rotation_done * 180 / M_PI, (rotation_done + 2 * M_PI) * 180 / M_PI);
-                rotation_done += 2 * M_PI;
-            }
-
-            ROS_INFO("current_orientation: %f, initial_orientation: %f, rotation_done: %f", current_orientation * 180 / M_PI, initial_orientation * 180 / M_PI, rotation_done * 180 / M_PI);
-
             // we receive a new /goal_to_reach
             if (new_goal_to_reach)
                 init_rotation();

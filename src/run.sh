@@ -60,8 +60,14 @@ for file_path in "$input_dir"/*.bag; do
     lines=$(wc -l < "$out_file")
     echo "$filename: $lines lines"
 
+    content=$(cat "$out_file")
+    # print content line by line
+    while IFS= read -r line; do
+        # append to out_file
+        echo "$line" >> "$out_file"
+    done <<< "$content"
+
     # re-write to fix malformed csv - did not work
-    # content=$(cat "$out_file")
     # echo "$content">"$out_file"
 
     # plot results

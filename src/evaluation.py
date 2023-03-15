@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     file_dir, filename = os.path.split(sys.argv[1])
 
-    df = pd.read_csv(sys.argv[1], header=None, names=['t', 'number_of_persons'], encoding='utf-8')
+    df = pd.read_csv(sys.argv[1], header=None, names=['t', 'number_of_persons'], encoding=None, on_bad_lines='warn', encoding_errors='replace')
 
     # Plot x=t, y=number of persons detected
     plt.plot(df['number_of_persons'])
@@ -38,4 +38,5 @@ if __name__ == '__main__':
 
     # save plot
     plt.savefig(output_path)
+    print(f'saved plot to {output_path}')
 
