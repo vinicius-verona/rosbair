@@ -65,8 +65,7 @@ void update() {
 
     if ( init_odom )
     {
-
-//        if ( first )
+        // if ( first )
         // initial_orientation = ...;
         if (first)
         {
