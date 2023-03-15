@@ -146,7 +146,7 @@ public:
                 rotation_to_do *= -1;
 
             // we initialize the pid for the control of rotation
-            //  initial_orientation = ; //TO COMPLETE
+            initial_orientation = current_orientation;
             error_integral_rotation = 0;
             error_previous_rotation = 0;
 
@@ -180,16 +180,16 @@ public:
         if (cond_rotation)
         {
             // Implementation of a PID controller for rotation_to_do;
-
-            // float error_derivation_rotation = ...;
+            float error_derivation_rotation = error_rotation - error_previous_rotation; 
             error_previous_rotation = error_rotation;
-            // ROS_INFO("error_derivation_rotation: %f", error_derivation_rotation);
 
-            // error_integral_rotation = ...;
-            // ROS_INFO("error_integral_rotation: %f", error_integral_rotation);
+            ROS_INFO("error_derivation_rotation: %f", error_derivation_rotation);
+
+            error_integral_rotation += error_rotation;
+            ROS_INFO("error_integral_rotation: %f", error_integral_rotation);
 
             // control of rotation with a PID controller
-            // rotation_speed = ...;
+            rotation_speed = kpr * error_rotation + kir * error_integral_rotation + kdr * error_derivation_rotation;
             ROS_INFO("rotation_speed: %f", rotation_speed * 180 / M_PI);
         }
 
@@ -255,3 +255,4 @@ int main(int argc, char **argv)
 
     return 0;
 }
+
