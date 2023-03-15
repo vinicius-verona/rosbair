@@ -114,7 +114,6 @@ include_directories(
 ## Declare a cpp executable
 add_executable(detection_node src/detection_node.cpp)
 add_executable(rotation_node src/rotation_node.cpp)
-add_executable(rotation_done_node src/rotation_done_node.cpp)
 add_executable(datmo_node src/datmo_node.cpp)
 add_executable(action_node src/action_node.cpp)
 add_executable(obstacle_detection_node src/obstacle_detection_node.cpp)
@@ -127,7 +126,6 @@ add_executable(robot_moving_node src/robot_moving_node.cpp)
 ## Specify libraries to link a library or executable target against
 target_link_libraries(detection_node ${catkin_LIBRARIES})
 target_link_libraries(rotation_node ${catkin_LIBRARIES})
-target_link_libraries(rotation_done_node ${catkin_LIBRARIES})
 target_link_libraries(datmo_node ${catkin_LIBRARIES})
 target_link_libraries(action_node ${catkin_LIBRARIES})
 target_link_libraries(obstacle_detection_node ${catkin_LIBRARIES})
