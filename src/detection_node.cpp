@@ -40,22 +40,20 @@
 using namespace std;
 
 // undefine ROS_INFO
-#undef ROS_INFO
-// define ROS_INFO to be silent
-#define ROS_INFO(...) \
-    do                \
-    {                 \
-    } while (0);
+// #undef ROS_INFO
+// // define ROS_INFO to be silent
+// #define ROS_INFO(...) \
+//     do                \
+//     {                 \
+//     } while (0);
 
-#undef ROS_WARN
-// define ROS_WARN to be silent
-#define ROS_WARN(...) \
-    do                \
-    {                 \
-    } while (0);
+// #undef ROS_WARN
+// // define ROS_WARN to be silent
+// #define ROS_WARN(...) \
+//     do                \
+//     {                 \
+//     } while (0);
 
-// setvbuf(stdout, NULL, _IONBF, 0);
-// std::ios::sync_with_stdio(false);
 std::vector<int> num_persons_detected;
 std::vector<int> num_legs_detected;
 int t = 0;  // time tick
@@ -257,26 +255,26 @@ public:
         }
 
         // DODO : save the number of persons detected
-        if ((t % 5) == 0)
-        {
-            // append everything new to a file
-            // std::ofstream myfile("persons_detected.csv", std::ios_base::app);
-            std::string str = "";
+        // if ((t % 5) == 0)
+        // {
+        //     // append everything new to a file
+        //     // std::ofstream myfile("persons_detected.csv", std::ios_base::app);
+        //     std::string str = "";
 
-            if (k == -1)
-            {
-                str += "time,persons_detected\n";
-                k++;
-            }
-            for (int i = k; i < num_persons_detected.size(); i++)
-            {
-                str += std::to_string(i) + "," + std::to_string(num_persons_detected.at(i)) + "\n";
-            }
-            k = num_persons_detected.size();
-            // myfile << str;
-            // myfile.close();
-            std::cerr << str;
-        }
+        //     if (k == -1)
+        //     {
+        //         str += "time,persons_detected\n";
+        //         k++;
+        //     }
+        //     for (int i = k; i < num_persons_detected.size(); i++)
+        //     {
+        //         str += std::to_string(i) + "," + std::to_string(num_persons_detected.at(i)) + "\n";
+        //     }
+        //     k = num_persons_detected.size();
+        //     // myfile << str;
+        //     // myfile.close();
+        //     std::cerr << str;
+        // }
 
     } // update
 
@@ -477,7 +475,6 @@ public:
 
                 cluster_count[nb_cluster] = current_cluster_count;
 
-                // cout the start, end and their distance
                 // ROS_INFO("start: (%f, %f), end: (%f, %f), distance: %f", current_scan[start].x, current_scan[start].y, current_scan[end].x, current_scan[end].y, cluster_size[nb_cluster]);
 
                 cluster_middle[nb_cluster] = middle;
@@ -491,25 +488,6 @@ public:
 
             cluster[loop] = nb_cluster;
         }
-
-        // Dont forget to update and display the last cluster
-        // ROS_INFO
-
-        // ROS_INFO("clustering performed");
-
-        // print clusters info
-        // for (int loop = 0; loop < nb_cluster; loop++) {
-        //     // ROS_INFO("cluster[%i] (%f, %f): size = %f", loop,
-        //     //          cluster_middle[loop].x, cluster_middle[loop].y,
-        //     //          cluster_size[loop]);
-
-        //     // std::cout << "cluster[" << loop << "] (" << cluster_middle[loop].x
-        //     // << ", " << cluster_middle[loop].y << "): size = " <<
-        //     // cluster_size[loop] << std::endl;
-
-        //     // print cluster count
-        //     ROS_INFO("cluster[%i] count = %i, size = %f", loop, cluster_count[loop], cluster_size[loop]);
-        // }
 
     } // perform_clustering
 
@@ -635,7 +613,7 @@ public:
             for (int loop_leg2 = loop_leg1 + 1; loop_leg2 < nb_legs_detected; loop_leg2++)
             {
                 float dist = distancePoints(cluster_middle[loop_leg1], cluster_middle[loop_leg2]);
-                ROS_INFO("distance between legs %d and %d: %f", loop_leg1, loop_leg2, dist);
+                // ROS_INFO("distance between legs %d and %d: %f", loop_leg1, loop_leg2, dist);
                 if (dist < legs_distance_max)
                 {
                     // Increment the number of people detected
@@ -705,7 +683,6 @@ public:
         }
 
         num_persons_detected.push_back(nb_persons_detected); // DODO
-        // std::cout << t << "," << nb_persons_detected << std::endl; // DODO
 
         // ROS_INFO("persons detected");
 
