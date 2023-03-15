@@ -16,9 +16,14 @@ if __name__ == '__main__':
         print('File does not exist')
         exit(1)
 
+    # if file size is 0bytes
+    if os.path.getsize(sys.argv[1]) == 0:
+        print('File is empty')
+        exit(1)
+
     file_dir, filename = os.path.split(sys.argv[1])
 
-    df = pd.read_csv(sys.argv[1], header=None, names=['t', 'number_of_persons'])
+    df = pd.read_csv(sys.argv[1], header=None, names=['t', 'number_of_persons'], encoding='utf-8')
 
     # Plot x=t, y=number of persons detected
     plt.plot(df['number_of_persons'])
