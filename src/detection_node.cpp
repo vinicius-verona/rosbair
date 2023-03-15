@@ -1,6 +1,7 @@
 #include <tf/transform_datatypes.h>
 
 #include <cmath>
+#include <fstream>
 
 #include "geometry_msgs/Point.h"
 #include "message_filters/subscriber.h"
@@ -34,6 +35,14 @@
 #define uncertainty_inc_leg 0.05
 
 using namespace std;
+
+
+// undefine ROS_INFO
+#undef ROS_INFO
+// define ROS_INFO to be silent
+#define ROS_INFO(...) \
+  do {                \
+  } while (0);
 
 class detection_node {
    private:
@@ -90,6 +99,10 @@ class detection_node {
     int nb_pts;
     geometry_msgs::Point display[1000];
     std_msgs::ColorRGBA colors[1000];
+
+
+    // std::vector<int> num_persons_detected;
+    int t = 0; // time tick
 
    public:
     detection_node() {
@@ -213,10 +226,25 @@ class detection_node {
 
             // graphical display of the results
             populateMarkerTopic();
+            t++; // increase time tick
         } else if (!init_robot) {
             ROS_WARN("waiting for robot_moving_node");
             ROS_WARN("launch: rosrun follow_me robot_moving_node");
         }
+
+        // DODO : save the number of persons detected to csv - rejected
+
+        // if ((t % 10000) == 0)
+        // {
+        //     // save the number of persons detected to csv
+        //     std::ofstream myfile("persons_detected.csv");
+        //     // build a string of the vector
+        //     std::string str = "";
+        //     for (int i = 0; i < num_persons_detected.size(); i++)
+        //     {
+        //         str += std::to_string(num_persons_detected[i]) + "," + std::to_string(num_persons_detected[i]) + "\n";
+        //     }
+        // }
 
     }  // update
 
@@ -265,20 +293,20 @@ class detection_node {
             }
 
             // WARNING COMMENTED OUT LOOP PRINTING BASIC HITS
-            // if (dynamic[loop]) {
-            //     // ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
-            //     //          current_scan[loop].x, current_scan[loop].y);
+            if (dynamic[loop]) {
+                // ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
+                //          current_scan[loop].x, current_scan[loop].y);
 
-            //     // display in blue of hits that are dynamic
-            //     display[nb_pts] = current_scan[loop];
+                // display in blue of hits that are dynamic
+                display[nb_pts] = current_scan[loop];
 
-            //     colors[nb_pts].r = 0;
-            //     colors[nb_pts].g = 0;
-            //     colors[nb_pts].b = 1;
-            //     colors[nb_pts].a = 1.0;
+                colors[nb_pts].r = 0;
+                colors[nb_pts].g = 0;
+                colors[nb_pts].b = 1;
+                colors[nb_pts].a = 1.0;
 
-            //     nb_pts++;
-            // }
+                nb_pts++;
+            }
         }
 
     }  // detect_motion
@@ -603,6 +631,8 @@ class detection_node {
         if (nb_persons_detected) {
             ROS_INFO("%d persons have been detected.\n", nb_persons_detected);
         }
+        // num_persons_detected.push_back(nb_persons_detected);  // DODO
+        std::cout << t << "," << nb_persons_detected << std::endl;
 
         // ROS_INFO("persons detected");
 
