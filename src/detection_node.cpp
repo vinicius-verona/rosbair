@@ -714,17 +714,29 @@ public:
     void detect_a_moving_person()
     {
         // ROS_INFO("detecting a moving person");
+        geometry_msgs::Point person_closest;
+        float distance_closest = 10000000;
+        geometry_msgs::Point robot_position;
+        robot_position.x = 0;
+        robot_position.y = 0;
 
         for (int loop = 0; loop < nb_persons_detected; loop++)
         {
             if (person_dynamic[loop])
             {
                 // we update moving_person_tracked and publish it
-                /*    moving_person_detected = ... */
                 moving_person_detected = person_detected[loop];
-                pub_detection_node.publish(moving_person_detected);
+                // pub_detection_node.publish(moving_person_detected);  // Note: commented out
+                
+                float distance = distancePoints(moving_person_detected, robot_position);
+                if (distance < distance_closest)
+                {
+                    distance_closest = distance;
+                    person_closest = moving_person_detected;
+                }
             }
         }
+        pub_detection_node.publish(person_closest);
 
         // ROS_INFO("detecting a moving person done");
 
