@@ -262,21 +262,21 @@ public:
             }
 
             // WARNING COMMENTED OUT LOOP PRINTING BASIC HITS
-            if (dynamic[loop])
-            {
-                // ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
-                //          current_scan[loop].x, current_scan[loop].y);
+            // if (dynamic[loop])
+            // {
+            //     // ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
+            //     //          current_scan[loop].x, current_scan[loop].y);
 
-                // display in blue of hits that are dynamic
-                display[nb_pts] = current_scan[loop];
+            //     // display in blue of hits that are dynamic
+            //     display[nb_pts] = current_scan[loop];
 
-                colors[nb_pts].r = 0;
-                colors[nb_pts].g = 0;
-                colors[nb_pts].b = 1;
-                colors[nb_pts].a = 1.0;
+            //     colors[nb_pts].r = 0;
+            //     colors[nb_pts].g = 0;
+            //     colors[nb_pts].b = 1;
+            //     colors[nb_pts].a = 1.0;
 
-                nb_pts++;
-            }
+            //     nb_pts++;
+            // }
         }
 
     } // detect_motion
@@ -335,13 +335,16 @@ public:
                 /////////////////////////////////////////////////////////
 
                 // graphical display of the end of the current cluster in red
-                display[nb_pts] = current_scan[end];
+                if (false) 
+                {
+                    display[nb_pts] = current_scan[end];
 
-                colors[nb_pts].r = 1;
-                colors[nb_pts].g = 0;
-                colors[nb_pts].b = 0;
-                colors[nb_pts].a = 1.0;
-                nb_pts++;
+                    colors[nb_pts].r = 1;
+                    colors[nb_pts].g = 0;
+                    colors[nb_pts].b = 0;
+                    colors[nb_pts].a = 1.0;
+                }
+                nb_pts++; // XYZXYZ
 
                 // compute the middle of the cluster
                 middle_x = 0;
@@ -640,6 +643,16 @@ public:
             }
         }
         pub_detection_node.publish(person_closest);
+        
+        // display the closest moving person
+        display[nb_pts] = person_closest;
+
+        colors[nb_pts].r = 0;
+        colors[nb_pts].g = 0;
+        colors[nb_pts].b = 1;
+        colors[nb_pts].a = 1.0;
+
+        nb_pts++;
 
         // ROS_INFO("detecting a moving person done");
 
