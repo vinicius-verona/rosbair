@@ -40,7 +40,7 @@
 using namespace std;
 
 // When outputting CSV logs, silence standard progress messages
-#define LOG_CSV 1
+// #define LOG_CSV 1
 
 #ifdef LOG_CSV
 // undefine ROS_INFO
@@ -409,6 +409,13 @@ public:
                 colors[nb_pts].a = 1.0;
                 nb_pts++;
 
+                cluster_middle[nb_cluster] = middle;
+                cluster_dynamic[nb_cluster] =
+                    100 * (int)((double)(points_dynamic) /
+                                (double)(abs(end - start) + 1)); //  % of dynamic points
+                                                                 //  within a cluster
+                
+
                 // the current hit is the start of the next cluster
                 // we start the next cluster
                 start = loop;
@@ -427,11 +434,6 @@ public:
 
                 // ROS_INFO("start: (%f, %f), end: (%f, %f), distance: %f", current_scan[start].x, current_scan[start].y, current_scan[end].x, current_scan[end].y, cluster_size[nb_cluster]);
 
-                cluster_middle[nb_cluster] = middle;
-                cluster_dynamic[nb_cluster] =
-                    100 * (int)((double)(points_dynamic) /
-                                (double)(abs(end - start) + 1)); //  % of dynamic points
-                                                                 //  within a cluster
                 // increase cluster number
                 nb_cluster++;
             }
@@ -564,7 +566,7 @@ public:
             {
                 float dist = distancePoints(cluster_middle[loop_leg1], cluster_middle[loop_leg2]);
                 // ROS_INFO("distance between legs %d and %d: %f", loop_leg1, loop_leg2, dist);
-                if (dist < legs_distance_max)
+                if (dist < legs_distance_max && dist > legs_distance_min)
                 {
                     // Increment the number of people detected
                     nb_persons_detected++;
@@ -576,10 +578,14 @@ public:
                     float middle_y = (cluster_middle[loop_leg1].y +
                                       cluster_middle[loop_leg2].y) /
                                      2;
+                    float middle_z = (cluster_middle[loop_leg1].z +
+                                      cluster_middle[loop_leg2].z) /
+                                     2;
 
                     geometry_msgs::Point middle = {};
                     middle.x = middle_x;
                     middle.y = middle_y;
+                    middle.z = middle_z;
 
                     person_detected[nb_persons_detected] = middle;
 
