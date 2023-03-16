@@ -39,20 +39,25 @@
 
 using namespace std;
 
-// undefine ROS_INFO
-// #undef ROS_INFO
-// // define ROS_INFO to be silent
-// #define ROS_INFO(...) \
-//     do                \
-//     {                 \
-//     } while (0);
+// When outputting CSV logs, silence standard progress messages
+#define LOG_CSV 1
 
-// #undef ROS_WARN
-// // define ROS_WARN to be silent
-// #define ROS_WARN(...) \
-//     do                \
-//     {                 \
-//     } while (0);
+#ifdef LOG_CSV
+// undefine ROS_INFO
+#undef ROS_INFO
+// define ROS_INFO to be silent
+#define ROS_INFO(...) \
+    do                \
+    {                 \
+    } while (0);
+
+#undef ROS_WARN
+// define ROS_WARN to be silent
+#define ROS_WARN(...) \
+    do                \
+    {                 \
+    } while (0);
+#endif
 
 std::vector<int> num_persons_detected;
 std::vector<int> num_legs_detected;
@@ -119,57 +124,6 @@ private:
 public:
     detection_node()
     {
-        // declare array of std_msgs::ColorRGBA
-        std_msgs::ColorRGBA sample_colors[7];
-        int color_index = 0;
-
-        // yellow
-        sample_colors[0].r = 1.0;
-        sample_colors[0].g = 1.0;
-        sample_colors[0].b = 0.0;
-        sample_colors[0].a = 1.0;
-
-        // Purple
-        sample_colors[1].r = 0.5;
-        sample_colors[1].g = 0.0;
-        sample_colors[1].b = 0.5;
-        sample_colors[1].a = 1.0;
-        // sky blue
-        sample_colors[2].r = 0.529;
-        sample_colors[2].g = 0.808;
-        sample_colors[2].b = 0.922;
-        sample_colors[2].a = 1.0;
-
-        // dark red
-        sample_colors[3].r = 0.545;
-        sample_colors[3].g = 0.0;
-        sample_colors[3].b = 0.0;
-        sample_colors[3].a = 1.0;
-
-        // lime green
-        sample_colors[4].r = 0.196;
-        sample_colors[4].g = 0.803;
-        sample_colors[4].b = 0.196;
-        sample_colors[4].a = 1.0;
-
-        // goldenrod
-        sample_colors[5].r = 0.855;
-        sample_colors[5].g = 0.647;
-        sample_colors[5].b = 0.125;
-        sample_colors[5].a = 1.0;
-
-        // dark turquoise
-        sample_colors[6].r = 0.0;
-        sample_colors[6].g = 0.808;
-        sample_colors[6].b = 0.820;
-        sample_colors[6].a = 1.0;
-
-        // coral
-        sample_colors[7].r = 1.0;
-        sample_colors[7].g = 0.498;
-        sample_colors[7].b = 0.314;
-        sample_colors[7].a = 1.0;
-
         sub_scan = n.subscribe("scan", 1, &detection_node::scanCallback, this);
         sub_robot_moving = n.subscribe(
             "robot_moving", 1, &detection_node::robot_movingCallback, this);
@@ -246,7 +200,7 @@ public:
 
             // graphical display of the results
             populateMarkerTopic();
-            t++; // increase time tick
+            t++; // increase time tick DODO
         }
         else if (!init_robot)
         {
@@ -255,26 +209,27 @@ public:
         }
 
         // DODO : save the number of persons detected
-        // if ((t % 5) == 0)
-        // {
-        //     // append everything new to a file
-        //     // std::ofstream myfile("persons_detected.csv", std::ios_base::app);
-        //     std::string str = "";
+        if ((t % 100) == 0 && false)
+        {
+            // append everything new to a file
+            // std::ofstream myfile("persons_detected.csv", std::ios_base::app);
+            std::string str = "";
 
-        //     if (k == -1)
-        //     {
-        //         str += "time,persons_detected\n";
-        //         k++;
-        //     }
-        //     for (int i = k; i < num_persons_detected.size(); i++)
-        //     {
-        //         str += std::to_string(i) + "," + std::to_string(num_persons_detected.at(i)) + "\n";
-        //     }
-        //     k = num_persons_detected.size();
-        //     // myfile << str;
-        //     // myfile.close();
-        //     std::cerr << str;
-        // }
+            if (k == -1)
+            {
+                str += "time,persons_detected\n";
+                k++;
+            }
+            for (int i = k; i < num_persons_detected.size(); i++)
+            {
+                str += std::to_string(i) + "," + std::to_string(num_persons_detected.at(i)) + "\n";
+            }
+            k = num_persons_detected.size();
+            // myfile << str;
+            // myfile.close();
+            // std::cerr << str;
+            cout << str << endl;
+        }
 
     } // update
 
@@ -388,24 +343,19 @@ public:
 
             if (points_dist > cluster_threshold || loop == nb_beams - 1)
             {
-
                 /////////////////// LAST CHANGES MADE ///////////////////
+                // last cluster -> end the current cluster with the current hit
+                // end the current cluster
                 if (loop == nb_beams - 1)
                 {
-                    // The size of the cluster is the euclidean distance between the start point and end point
-                    cluster_size[nb_cluster] = distancePoints(current_scan[start], current_scan[loop]);
-
-                    // we end the current cluster
                     end = loop;
                 }
                 else
                 {
-                    // The size of the cluster is the euclidean distance between the start point and end point
-                    cluster_size[nb_cluster] = distancePoints(current_scan[start], current_scan[loop - 1]);
-
-                    // we end the current cluster
                     end = loop - 1;
                 }
+                // The size of the cluster is the euclidean distance between the start point and end point
+                cluster_size[nb_cluster] = distancePoints(current_scan[start], current_scan[end]);
                 /////////////////////////////////////////////////////////
 
                 // graphical display of the end of the current cluster in red
@@ -591,7 +541,7 @@ public:
         {
             ROS_INFO("%d legs have been detected.\n", nb_legs_detected);
         }
-        num_legs_detected.push_back(nb_legs_detected);
+        num_legs_detected.push_back(nb_legs_detected); // DODO
 
         // ROS_INFO("detecting legs done");
 
@@ -704,7 +654,7 @@ public:
                 // we update moving_person_tracked and publish it
                 moving_person_detected = person_detected[loop];
                 // pub_detection_node.publish(moving_person_detected);  // Note: commented out
-                
+
                 float distance = distancePoints(moving_person_detected, robot_position);
                 if (distance < distance_closest)
                 {
@@ -867,32 +817,42 @@ public:
     }
 };
 
-// void signalHandler(int signum)
-// {
-//     cout << "Interrupt signal (" << signum << ") received.\n";
+void signalHandler(int signum)
+{
+#ifdef LOG_CSV
+    cout << "Interrupt signal (" << signum << ") received.\n";
 
-//     // cleanup and close up stuff here
-//     std::string str = "";
-//     if (k == 0)
-//     {
-//         str += "time,num_persons_detected\n";
-//     }
-//     for (int i = 0; i < num_persons_detected.size(); i++)
-//     {
-//         str += i + "," + std::to_string(num_persons_detected[i]) + "\n";
-//     }
-//     std::cout << str << std::endl;
+    // Note: not terminating
+    if (signum == 2)
+    {
+        // cleanup and close up stuff here
+        std::string str = "";
+        str += "time,num_persons_detected\n";
+        for (int i = 0; i < num_persons_detected.size(); i++)
+        {
+            str += std::to_string(i) + "," + std::to_string(num_persons_detected.at(i)) + "\n";
+        }
+        // std::cout << str << std::endl;
+        std::cout << num_persons_detected.size() << " entries in vector" << std::endl;
 
-//     // terminate program
-//     exit(signum);
-// }
+        // write everything to a file
+        std::ofstream myfile("persons_detected.csv"); // , std::ios_base::app
+        myfile << str << std::endl;
+        myfile.close();
+
+        // erase whole vector
+        num_persons_detected.clear();
+
+        // Note: not terminating
+    }
+#endif // LOG_CSV
+}
 
 int main(int argc, char **argv)
 {
-    // signal(SIGINT, signalHandler);
-    // signal(SIGABRT, signalHandler);
+    signal(SIGINT, signalHandler);
 
-    ros::init(argc, argv, "detection_node");
+    ros::init(argc, argv, "detection_node", ros::init_options::NoSigintHandler);
 
     ROS_INFO("waiting for activation of detection");
     detection_node bsObject;

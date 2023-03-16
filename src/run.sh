@@ -9,7 +9,6 @@ if [ $# -eq 0 ]; then
     exit 1
 fi
 
-
 # sanitize input - remove trailing slash
 input_dir=$(echo "$1" | sed 's:/*$::')
 
@@ -18,6 +17,14 @@ if [ ! -d "$input_dir" ]; then
     exit 1
 fi
 
+is_running=$(pgrep -f robot_moving_node | wc -l)
+if [ "$is_running" -eq 0 ]; then
+    # prefer the user to launch it themselves, rather than managing a background process
+    echo "You are not running the robot_moving_node!" >&2
+    echo "Please run it in a separate terminal, e.g.:" >&2
+    echo "rosrun follow_me robot_moving_node" >&2
+    exit 1
+fi
 catkin_dir=~/catkin_ws
 
 # build but in subshell
@@ -31,45 +38,56 @@ if [ ! -d "$eval_dir" ]; then
     echo "Created evaluation dir: $eval_dir"
 fi
 
-is_running=$(ps -ef | grep robot_moving_node | grep -v grep | wc -l)
-if [ "$is_running" -eq 0 ]; then
-    echo "Not running robot_moving_node!" >&2
+tmp_file=persons_detected.csv
+if [ -f "$tmp_file" ]; then
+    rm "$tmp_file"
+    echo "Removed old temporary output file $tmp_file"
 fi
 
+# Run the detection node, redirect output to a file "out.csv", and errors to "err.txt"
+rosrun follow_me detection_node "$file_path" & # -- 2>"$out_file" & # 2>"$err_file" &
+rosrun_pid=$!; 
 
 for file_path in "$input_dir"/*.bag; do
     # get filename without path
     filename=$(basename -- "$file_path")
     echo "Processing $filename"
 
+    rosbag info "$file_path" | grep 'duration'
+
+    out_file="$eval_dir"/persons_"$filename".csv
     # currently, output goes to stderr to avoid buffering
     # err_file="$eval_dir"/$filename.err
     # err_file=/dev/null
 
-    out_file="$eval_dir"/persons_"$filename".csv
+    rosbag play --quiet "$file_path"  # --immediate 
 
-    # start rosbag play of the recording in the background, kill rosrun when rosbag is done
-    rosbag play --quiet "$file_path" &  # --immediate 
-    rosbag_pid=$!
+    # no explicit waiting needed
+    # rosbag_pid=$!
+    # wait $rosbag_pid;
 
-    # Run the detection node, redirect output to a file "out.csv", and errors to "err.txt"
-    rosrun follow_me detection_node "$file_path" -- 2>"$out_file" & # 2>"$err_file" &
-    rosrun_pid=$!; wait $rosbag_pid; kill $rosrun_pid
+    kill -2 $rosrun_pid  # send SIGINT (but not to terminate)
+
+    # wait for file to be written
+    while [ ! -f "$tmp_file" ]; do
+        sleep 0.1
+        # write dot without newline
+        echo -n "."
+    done
+    echo ""
+
+    mv -f "$tmp_file" "$out_file"
 
     # count lines in out.csv
     lines=$(wc -l < "$out_file")
     echo "$filename: $lines lines"
-
-    content=$(cat "$out_file")
-    # print content line by line
-    while IFS= read -r line; do
-        # append to out_file
-        echo "$line" >> "$out_file"
-    done <<< "$content"
-
-    # re-write to fix malformed csv - did not work
-    # echo "$content">"$out_file"
+    if [ "$lines" -lt 2 ]; then
+        echo "No data in $out_file, skipping plotting">&2
+        continue
+    fi
 
     # plot results
-    python3 ~/catkin_ws/src/follow_me/src/evaluation.py "$file_path"  # todo fix UnicodeDecodeError
+    python3 ~/catkin_ws/src/follow_me/src/evaluation.py "$out_file"  # todo fix UnicodeDecodeError
 done
+
+kill -9 $rosrun_pid
