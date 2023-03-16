@@ -26,24 +26,30 @@ if __name__ == '__main__':
     df = pd.read_csv(csv_path)
 
     # cast data to int
-    t_int = df['time'].astype(int, errors='ignore')
-    det_int = df['num_persons_detected'].astype(int, errors='ignore')
+    # t_int = df['time'].astype(int, errors='ignore')
+    # det_int = df['num_persons_detected'].astype(int, errors='ignore')
+    # mov_int = df['num_moving_detected'].astype(int, errors='ignore')
 
+    ''' Persons (general) '''
     # Plot x=t, y=number of persons detected
     if False:
         # line plot - too messy with noisy data
         plt.plot(df['time'], df['num_persons_detected'])
     else:
         # scatter plot with small points
-        plt.scatter(df['time'], df['num_persons_detected'], s=2)
+        plt.scatter(df['time'], df['num_persons_detected'], s=2, color='blue')
         # smoothed plot
         plt.plot(df['time'], df['num_persons_detected'].rolling(window=10).mean(), color='green')
+
+    ''' Moving Persons '''
+    plt.scatter(df['time'], df['num_moving_detected'], s=2, color='red')
+    plt.plot(df['time'], df['num_moving_detected'].rolling(window=10).mean(), color='orange')
 
     plt.xlabel('time [ticks]')
     plt.ylabel('persons detected')
     plt.ylim(0)
     plt.xlim(0)
-    plt.legend(['persons', 'rolling mean (10)'])
+    plt.legend(['persons', 'persons mean (10)', 'moving persons', 'moving mean (10)'])
     plt.suptitle('Number of persons detected over time')
     plt.title(filename)
     # hide top and right axis

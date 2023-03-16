@@ -60,7 +60,7 @@ for file_path in "$input_dir"/*.bag; do
     # err_file="$eval_dir"/$filename.err
     # err_file=/dev/null
 
-    rosbag play --quiet "$file_path"  # --immediate 
+    rosbag play --hz=500 --quiet "$file_path"  # todo check frequency argument
 
     # no explicit waiting needed
     # rosbag_pid=$!
@@ -87,7 +87,8 @@ for file_path in "$input_dir"/*.bag; do
     fi
 
     # plot results
-    python3 ~/catkin_ws/src/follow_me/src/evaluation.py "$out_file"  # todo fix UnicodeDecodeError
+    python3 ~/catkin_ws/src/follow_me/src/evaluation.py "$out_file";
+    
 done
 
 kill -9 $rosrun_pid
