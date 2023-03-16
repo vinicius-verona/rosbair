@@ -200,37 +200,13 @@ public:
 
             // graphical display of the results
             populateMarkerTopic();
-            t++; // increase time tick DODO
+            t++; // increase time tick
         }
         else if (!init_robot)
         {
             ROS_WARN("waiting for robot_moving_node");
             ROS_WARN("launch: rosrun follow_me robot_moving_node");
         }
-
-        // DODO : save the number of persons detected
-        if ((t % 100) == 0 && false)
-        {
-            // append everything new to a file
-            // std::ofstream myfile("persons_detected.csv", std::ios_base::app);
-            std::string str = "";
-
-            if (k == -1)
-            {
-                str += "time,persons_detected\n";
-                k++;
-            }
-            for (int i = k; i < num_persons_detected.size(); i++)
-            {
-                str += std::to_string(i) + "," + std::to_string(num_persons_detected.at(i)) + "\n";
-            }
-            k = num_persons_detected.size();
-            // myfile << str;
-            // myfile.close();
-            // std::cerr << str;
-            cout << str << endl;
-        }
-
     } // update
 
     // DETECT MOTION FOR BOTH LASER
@@ -541,7 +517,7 @@ public:
         {
             ROS_INFO("%d legs have been detected.\n", nb_legs_detected);
         }
-        num_legs_detected.push_back(nb_legs_detected); // DODO
+        num_legs_detected.push_back(nb_legs_detected);
 
         // ROS_INFO("detecting legs done");
 
@@ -632,7 +608,7 @@ public:
             ROS_INFO("%d persons have been detected.\n", nb_persons_detected);
         }
 
-        num_persons_detected.push_back(nb_persons_detected); // DODO
+        num_persons_detected.push_back(nb_persons_detected);
 
         // ROS_INFO("persons detected");
 
@@ -817,9 +793,9 @@ public:
     }
 };
 
+#ifdef LOG_CSV
 void signalHandler(int signum)
 {
-#ifdef LOG_CSV
     cout << "Interrupt signal (" << signum << ") received.\n";
 
     // Note: not terminating
@@ -845,14 +821,15 @@ void signalHandler(int signum)
 
         // Note: not terminating
     }
-#endif // LOG_CSV
 }
+#endif // LOG_CSV
 
 int main(int argc, char **argv)
 {
+    #ifdef LOG_CSV
     signal(SIGINT, signalHandler);
-
     ros::init(argc, argv, "detection_node", ros::init_options::NoSigintHandler);
+    #endif // LOG_CSV
 
     ROS_INFO("waiting for activation of detection");
     detection_node bsObject;
