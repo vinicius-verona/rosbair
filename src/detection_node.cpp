@@ -849,6 +849,8 @@ int main(int argc, char **argv)
     signal(SIGINT, signalHandler);
     ros::init(argc, argv, "detection_node", ros::init_options::NoSigintHandler);
     #endif // LOG_CSV
+    ros::init(argc, argv, "detection_node");
+
 
     ROS_INFO("waiting for activation of detection");
     detection_node bsObject;
