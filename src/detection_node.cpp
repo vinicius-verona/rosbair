@@ -40,7 +40,7 @@
 using namespace std;
 
 // When outputting CSV logs, silence standard progress messages
-// #define LOG_CSV 1
+#define LOG_CSV 1
 
 #ifdef LOG_CSV
 // undefine ROS_INFO
@@ -61,7 +61,7 @@ using namespace std;
 
 std::vector<int> num_persons_detected;
 std::vector<int> num_moving_detected;
-std::vector<int> num_legs_detected;
+std::vector<int> num_legs_detected;  // unused
 int t = 0;  // time tick
 int k = -1; // lines written into csv, -1 is intentional
 
@@ -258,7 +258,7 @@ public:
             //  r ) is higher than "detection_threshold"
             float diff = fabs(background[loop] - r[loop]);
 
-            if (diff > detection_threshold * (1 + 0.2 * fabs(background[loop]))) // remember change from assignment here
+            if (diff > detection_threshold * (1 + 0.2 * fabs(background[loop]))) // remember change from assignment here, 20cm at 0m, 40cm at 5m
             {
                 dynamic[loop] = true; // the current hit is dynamic
                 // ROS_INFO("motion detected");
@@ -653,7 +653,7 @@ public:
 
         if (nb_persons_detected)
         {
-            ROS_INFO("%d / %d moving / persons detected.\n", nb_moving_persons, nb_persons_detected);
+            ROS_INFO("%d/%d moving/persons detected.\n", nb_moving_persons, nb_persons_detected);
         }
 
         num_persons_detected.push_back(nb_persons_detected);

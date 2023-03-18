@@ -5,7 +5,7 @@
 
 if [ $# -eq 0 ]; then
     echo "No arguments supplied, please provide path to bag file directory, e.g. "
-    echo "./run.sh ~/catkin_ws/Data/recordings-2"
+    echo "$0 ~/catkin_ws/Data/recordings-2"
     exit 1
 fi
 
@@ -44,6 +44,13 @@ if [ -f "$tmp_file" ]; then
     echo "Removed old temporary output file $tmp_file"
 fi
 
+is_running=$(pgrep -f detection_node | wc -l)
+if [ "$is_running" -eq 1 ]; then
+    echo "detection_node already running, kill it by:">&2
+    echo "pkill detection_node">&2
+    exit 1
+fi
+
 # Run the detection node, redirect output to a file "out.csv", and errors to "err.txt"
 rosrun follow_me detection_node "$file_path" & # -- 2>"$out_file" & # 2>"$err_file" &
 rosrun_pid=$!; 
@@ -60,7 +67,7 @@ for file_path in "$input_dir"/*.bag; do
     # err_file="$eval_dir"/$filename.err
     # err_file=/dev/null
 
-    rosbag play --hz=500 --quiet "$file_path"  # todo check frequency argument
+    rosbag play --quiet "$file_path"
 
     # no explicit waiting needed
     # rosbag_pid=$!

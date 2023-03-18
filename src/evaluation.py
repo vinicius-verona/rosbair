@@ -25,11 +25,6 @@ if __name__ == '__main__':
 
     df = pd.read_csv(csv_path)
 
-    # cast data to int
-    # t_int = df['time'].astype(int, errors='ignore')
-    # det_int = df['num_persons_detected'].astype(int, errors='ignore')
-    # mov_int = df['num_moving_detected'].astype(int, errors='ignore')
-
     ''' Persons (general) '''
     # Plot x=t, y=number of persons detected
     if False:
@@ -59,6 +54,8 @@ if __name__ == '__main__':
     plt.tight_layout()
     # horizontal major grid lines
     plt.grid(axis='y', which='major', linestyle='-', linewidth='0.5', color='grey')
+    # make y ticks integers
+    plt.gca().yaxis.set_major_locator(plt.MaxNLocator(integer=True))
 
 
     # save plot
@@ -73,3 +70,25 @@ if __name__ == '__main__':
 
     # show plot interactively - unused
     # plt.show()
+
+    ''' Numeric evaluation '''
+    print(df.describe())
+
+    # mean_total = df['num_persons_detected'].mean()
+    # std_total = df['num_persons_detected'].std()
+    # print('persons detected')
+    # print(f'Mean: {mean_total:.2f}')
+    # print(f'Std: {std_total:.2f}')
+
+    # mean_moving = df['num_moving_detected'].mean()
+    # std_moving = df['num_moving_detected'].std()
+    # print('moving persons detected')
+    # print(f'Mean: {mean_moving:.2f}')
+    # print(f'Std: {std_moving:.2f}')
+
+    # % at least 1 person was detected
+    print(f'time% >=1 person detected: {df[df["num_persons_detected"] > 0].shape[0] / df.shape[0] * 100:.2f}%')
+    # % at least 1 moving person was detected
+    print(f'time% >=1 moving person detected: {df[df["num_moving_detected"] > 0].shape[0] / df.shape[0] * 100:.2f}%')
+
+    
