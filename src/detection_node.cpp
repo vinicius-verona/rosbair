@@ -40,7 +40,7 @@
 using namespace std;
 
 // When outputting CSV logs, silence standard progress messages
-#define LOG_CSV 1
+// #define LOG_CSV 1 // When commented, does not generate the CSV logs and enable the ROS logs
 
 #ifdef LOG_CSV
 // undefine ROS_INFO
