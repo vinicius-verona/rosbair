@@ -129,7 +129,8 @@ void update() {
         {
             compute_rotation();
             compute_translation();
-            //cond_goal = ... DO NOT FORGET TO UPDATE cond_goal
+            cond_goal = cond_rotation || cond_translation;
+            // cond_goal = ... DO NOT FORGET TO UPDATE cond_goal
             combine_rotation_and_translation();            
             move_robot();
         }
@@ -221,7 +222,8 @@ void compute_translation()
 
     ROS_INFO("current_position: (%f, %f), initial_position: (%f, %f)", current_position.x, current_position.y, initial_position.x, initial_position.y);
     translation_done = distancePoints(current_position, initial_position); // OWN
-    error_translation = clamp(translation_to_do - translation_done);  // OWN
+    error_translation = translation_to_do - translation_done;  // OWN
+    // error_translation = clamp(translation_to_do - translation_done);  // OWN
 
     ROS_INFO("translation_to_do: %f, translation_done: %f, error_translation: %f", translation_to_do, translation_done, error_translation);
 
@@ -246,13 +248,13 @@ void compute_translation()
 void combine_rotation_and_translation()
 {
 
-    // float coef_rotation = 0...;
-    // if ( coef_rotation >= 1 )
-        // coef_rotation = 1;
-    // float coef_translation = 1 - coef_rotation;
+    float coef_rotation = fabs(error_rotation) / rotation_speed_max;
+    if ( coef_rotation >= 1 )
+        coef_rotation = 1;
+    float coef_translation = 1 - coef_rotation;
 
-    //translation_speed = ...
-    // ROS_INFO("coef_rotation: %f, rotation_speed: %f, coef_translation: %f, translation_speed: %f", coef_rotation, rotation_speed*180/M_PI, coef_translation, translation_speed);
+    translation_speed = coef_translation * translation_speed;
+    ROS_INFO("coef_rotation: %f, rotation_speed: %f, coef_translation: %f, translation_speed: %f", coef_rotation, rotation_speed*180/M_PI, coef_translation, translation_speed);
 
 }//combine_rotation_and_translation
 
