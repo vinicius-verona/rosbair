@@ -163,12 +163,12 @@ void init_action()
             rotation_to_do *=-1;
 
         //we initialize the pid for the control of rotation
-        //initial_orientation = ; //TO COMPLETE
+        initial_orientation = current_orientation;
         error_integral_rotation = 0;
         error_previous_rotation = 0;
 
         //we initialize the pid for the control of translation
-        //initial_position = ; //TO COMPLETE
+        initial_position = current_position;
         error_integral_translation = 0;
         error_previous_translation = 0;
 
