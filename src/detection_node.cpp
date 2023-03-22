@@ -202,6 +202,7 @@ public:
 
                 // clear background
                 stored_background = false;
+                // reset_motion(); // did not seem necessary, never used
             }
             previous_robot_moving = current_robot_moving;
 
