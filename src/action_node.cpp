@@ -220,26 +220,24 @@ void compute_translation()
 {
 
     ROS_INFO("current_position: (%f, %f), initial_position: (%f, %f)", current_position.x, current_position.y, initial_position.x, initial_position.y);
-    translation_done = sqrt( ( current_position.x - initial_position.x ) * ( current_position.x - initial_position.x ) +
-                             ( current_position.y - initial_position.y ) * ( current_position.y - initial_position.y ) );
-    //error_translation = ...
+    translation_done = distancePoints(current_position, initial_position); // OWN
+    error_translation = clamp(translation_to_do - translation_done);  // OWN
 
     ROS_INFO("translation_to_do: %f, translation_done: %f, error_translation: %f", translation_to_do, translation_done, error_translation);
 
-    //cond_translation = ...; cond_translation is used to control if we stop or not the pid for translation
+    cond_translation = fabs(error_translation) > safety_distance; //cond_translation is used to control if we stop or not the pid for translation
 
     if ( cond_translation )
     {
         //Implementation of a PID controller for translation_to_do;
+        float error_derivation_translation = error_translation - error_previous_translation;
+        ROS_INFO("error_derivation_translation: %f", error_derivation_translation);
 
-        // float error_derivation_translation = ...;
-        //ROS_INFO("error_derivation_translation: %f", error_derivation_translation);
-
-        // error_integral_translation = ...
-        //ROS_INFO("error_integral_translation: %f", error_integral_translation);
+        error_integral_translation += error_translation;
+        ROS_INFO("error_integral_translation: %f", error_integral_translation);
 
         //control of translation with a PID controller
-        //translation_speed = ...
+        translation_speed = kpt * error_translation + kit * error_integral_translation + kdt * error_derivation_translation;
         ROS_INFO("translation_speed: %f", translation_speed);
     }    
 
@@ -248,7 +246,7 @@ void compute_translation()
 void combine_rotation_and_translation()
 {
 
-    float coef_rotation;// = ...;
+    // float coef_rotation = ...;
     if ( coef_rotation >= 1 )
         coef_rotation = 1;
     float coef_translation = 1 - coef_rotation;
