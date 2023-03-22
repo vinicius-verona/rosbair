@@ -252,7 +252,7 @@ void combine_rotation_and_translation()
     // float coef_translation = 1 - coef_rotation;
 
     //translation_speed = ...
-    ROS_INFO("coef_rotation: %f, rotation_speed: %f, coef_translation: %f, translation_speed: %f", coef_rotation, rotation_speed*180/M_PI, coef_translation, translation_speed);
+    // ROS_INFO("coef_rotation: %f, rotation_speed: %f, coef_translation: %f, translation_speed: %f", coef_rotation, rotation_speed*180/M_PI, coef_translation, translation_speed);
 
 }//combine_rotation_and_translation
 
