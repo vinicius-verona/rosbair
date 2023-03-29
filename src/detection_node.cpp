@@ -202,6 +202,7 @@ public:
 
                 // clear background
                 stored_background = false;
+                // reset_motion(); // did not seem necessary, never used
             }
             previous_robot_moving = current_robot_moving;
 
@@ -261,7 +262,7 @@ public:
             if (diff > detection_threshold * (1 + 0.2 * fabs(background[loop]))) // remember change from assignment here, 20cm at 0m, 40cm at 5m
             {
                 dynamic[loop] = true; // the current hit is dynamic
-                // ROS_INFO("motion detected");
+                ROS_INFO("motion detected");
             }
             else
             {
@@ -270,21 +271,21 @@ public:
 
             // WARNING COMMENTED OUT LOOP PRINTING BASIC HITS
             // These are displayed in BLUE
-            // if (dynamic[loop])
-            // {
-            //     // ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
-            //     //          current_scan[loop].x, current_scan[loop].y);
+            if (dynamic[loop])
+            {
+                ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
+                         current_scan[loop].x, current_scan[loop].y);
 
-            //     // display in blue of hits that are dynamic
-            //     display[nb_pts] = current_scan[loop];
+                // display in blue of hits that are dynamic
+                display[nb_pts] = current_scan[loop];
 
-            //     colors[nb_pts].r = 0;
-            //     colors[nb_pts].g = 0;
-            //     colors[nb_pts].b = 1;
-            //     colors[nb_pts].a = 1.0;
+                colors[nb_pts].r = 0;
+                colors[nb_pts].g = 0;
+                colors[nb_pts].b = 1;
+                colors[nb_pts].a = 1.0;
 
-            //     nb_pts++;
-            // }
+                nb_pts++;
+            }
         }
 
     } // detect_motion
