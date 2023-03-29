@@ -44,7 +44,7 @@
 #define SHOW_DYNAMIC_HITS 0
 #define SHOW_STATIC_LEGS 0
 #define SHOW_DYNAMIC_LEGS 0
-#define SHOW_STATIC_PERSONS 0
+#define SHOW_STATIC_PERSONS 1
 #define SHOW_DYNAMIC_PERSONS 1
 #define SHOW_TRACKED_PERSON 1
 #define SHOW_ROBOT_POSITION 0
@@ -158,8 +158,8 @@ void update() {
 
         init_laser = false;
         ROS_INFO("\n");
-        ROS_INFO("New data of laser received");
-        ROS_INFO("New data of robot_moving received");
+        // ROS_INFO("New data of laser received");
+        // ROS_INFO("New data of robot_moving received");
 
         if ( !current_robot_moving ) {
             //if the robot is not moving then we can perform moving person detection
@@ -219,7 +219,7 @@ void update() {
 void store_background() {
 // store all the hits of the laser in the background table
 
-    ROS_INFO("storing background");
+    // ROS_INFO("storing background");
 
     for (int loop=0; loop<nb_beams; loop++)
         background[loop] = r[loop];
@@ -231,11 +231,11 @@ void store_background() {
 void reset_motion() {
 // for each hit, compare the current range with the background to detect motion
 
-    ROS_INFO("reset motion");
+    // ROS_INFO("reset motion");
     for (int loop=0 ; loop<nb_beams; loop++ )
         dynamic[loop] = false;
 
-    ROS_INFO("reset_motion done");
+    // ROS_INFO("reset_motion done");
 
 }//reset_motion
 
@@ -290,7 +290,7 @@ void perform_clustering() {
 //then we end the current cluster with the previous hit and start a new cluster with the current hit
 //else the current hit belongs to the current cluster
 
-    ROS_INFO("performing clustering");
+    // ROS_INFO("performing clustering");
 
     nb_cluster = 0;//to count the number of cluster
 
@@ -419,7 +419,7 @@ void perform_clustering() {
 
         cluster[loop] = nb_cluster;
     }
-    ROS_INFO("clustering performed");
+    // ROS_INFO("clustering performed");
 
 }//perform_clustering
 
@@ -502,10 +502,10 @@ void detect_legs() {
 
         if (nb_legs_detected)
         {
-            ROS_INFO("%d legs have been detected.\n", nb_legs_detected);
+            // ROS_INFO("%d legs have been detected.\n", nb_legs_detected);
         }
 
-        ROS_INFO("detecting legs done");
+        // ROS_INFO("detecting legs done");
 }//detect_legs
 
 void detect_persons() {
@@ -570,7 +570,7 @@ void detect_persons() {
                     if (SHOW_DYNAMIC_PERSONS && person_dynamic[nb_persons_detected])
                     {
                         nb_moving_persons++;
-                        ROS_INFO("moving person detected: leg[%i]+leg[%i] -> (%f,%f) ", loop_leg1, loop_leg2, person_detected[nb_persons_detected].x,
+                        ROS_INFO("moving person detected: [%i] + [%i] -> (%f,%f) ", loop_leg1, loop_leg2, person_detected[nb_persons_detected].x,
                                  person_detected[nb_persons_detected].y);
 
                         ROS_INFO("^ made up of [%f, %f], [%f, %f]", leg1_middle.x, leg1_middle.y, leg2_middle.x, leg2_middle.y);
@@ -586,7 +586,7 @@ void detect_persons() {
                     }
                     else if (SHOW_STATIC_PERSONS && !person_dynamic[nb_persons_detected])
                     {
-                        ROS_INFO("static person detected: leg[%i]+leg[%i] -> (%f,%f)", loop_leg1, loop_leg2, person_detected[nb_persons_detected].x,
+                        ROS_INFO("static person detected: [%i] + [%i] -> (%f,%f)", loop_leg1, loop_leg2, person_detected[nb_persons_detected].x,
                                  person_detected[nb_persons_detected].y);
                         // a static person detected is red
                         display[nb_pts] = person_detected[nb_persons_detected];
@@ -677,7 +677,7 @@ void detect_a_moving_person() {
 
 void track_a_moving_person() {
 
-    ROS_INFO("tracking a moving person");
+    // ROS_INFO("tracking a moving person");
 
     bool associated = false;
     float distance_min = uncertainty;
@@ -688,17 +688,17 @@ void track_a_moving_person() {
     {
         // EUCLIDIAN DISTANCE between the moving_person_tracked and the current_person_detected
         float current_dist = distancePoints(moving_person_tracked, person_detected[loop_detection]); 
-        ROS_INFO("distance with [%i] = %f", loop_detection, current_dist);
+        // ROS_INFO("distance with [%i] = %f", loop_detection, current_dist);
         if (  current_dist < distance_min ) {
             // we store the info about the closest detection
-            ROS_INFO("track associated with %i", loop_detection);
+            ROS_INFO("tracking person: %i", loop_detection);
             distance_min = current_dist;
             index_min = loop_detection;
             associated = true;
         }
     }
 
-    nb_pts -= nb_persons_detected; // TODO CHECK why decreased: run with, without; compare
+    // nb_pts -= nb_persons_detected; // TODO CHECK why decreased: run with, without; compare
 
     if ( associated )
     {
@@ -713,15 +713,18 @@ void track_a_moving_person() {
                                                             moving_person_tracked.y,
                                                             frequency,
                                                             uncertainty);
-        // moving person tracked is green
-        display[nb_pts] = moving_person_tracked;
+        if (SHOW_TRACKED_PERSON)
+        {
+            // moving person tracked is green
+            display[nb_pts] = moving_person_tracked;
 
-        colors[nb_pts].r = 0;
-        colors[nb_pts].g = 1;
-        colors[nb_pts].b = 0;
-        colors[nb_pts].a = 1.0;
+            colors[nb_pts].r = 0;
+            colors[nb_pts].g = 1;
+            colors[nb_pts].b = 0;
+            colors[nb_pts].a = 1.0;
 
-        nb_pts++;
+            nb_pts++;
+        }
     }
     else {
         // if the moving_person_tracked has not been associated how we update moving_person_tracked, frequency and uncertainty
@@ -732,8 +735,6 @@ void track_a_moving_person() {
         frequency = std::max(frequency - 1, frequency_min);
         uncertainty = std::min(uncertainty + uncertainty_inc, uncertainty_max);
 
-        // tracking_mode = false;
-        // tracking_mode = ...; when do we switch tracking_mode to false ???
         tracking_mode = (frequency > frequency_min);
         if ( !tracking_mode )
         {
@@ -745,7 +746,7 @@ void track_a_moving_person() {
         }
     }
 
-    ROS_INFO("tracking of a moving person done");
+    // ROS_INFO("tracking of a moving person done");
 
 }
 
