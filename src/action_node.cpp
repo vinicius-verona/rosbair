@@ -197,7 +197,7 @@ void compute_rotation()
     ROS_INFO("rotation_to_do: %f, rotation_done: %f, error_rotation: %f", rotation_to_do * 180 / M_PI, rotation_done * 180 / M_PI, error_rotation * 180 / M_PI);
 
     // cond_rotation = ...; cond_rotation is used to control if we stop or not the pid
-    cond_rotation = (fabs(error_rotation) > 0.01);  // OWN
+    cond_rotation = (fabs(error_rotation) > error_rotation_threshold);  // OWN
 
     if (cond_rotation)
     {

@@ -497,7 +497,7 @@ void detect_legs() {
                 nb_legs_detected++;
             }
 
-            nb_pts++; // actually should be here - otherwise "Points should not be empty in rviz"
+            // nb_pts++; // actually should be here - otherwise "Points should not be empty in rviz" - Removed during tracking
         }
 
         if (nb_legs_detected)
