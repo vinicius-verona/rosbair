@@ -40,6 +40,15 @@
 #define uncertainty_max 1.0
 #define uncertainty_inc 0.05
 
+#define SHOW_CLUSTERS 0
+#define SHOW_DYNAMIC_HITS 0
+#define SHOW_STATIC_LEGS 0
+#define SHOW_DYNAMIC_LEGS 0
+#define SHOW_STATIC_PERSONS 0
+#define SHOW_DYNAMIC_PERSONS 1
+#define SHOW_TRACKED_PERSON 1
+#define SHOW_ROBOT_POSITION 0
+
 using namespace std;
 
 std::vector<int> num_persons_detected;
@@ -152,8 +161,6 @@ void update() {
         ROS_INFO("New data of laser received");
         ROS_INFO("New data of robot_moving received");
 
-        nb_pts = 0;
-
         if ( !current_robot_moving ) {
             //if the robot is not moving then we can perform moving person detection
             //DO NOT FORGET to store the background but when ???
@@ -252,8 +259,8 @@ void detect_motion() {
             dynamic[loop] = false;
         }
 
-        // These are displayed in BLUE
-        if (dynamic[loop])
+        // Dynamic hits are displayed in `blue`
+        if (SHOW_DYNAMIC_HITS && dynamic[loop])
         {
             ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
                         current_scan[loop].x, current_scan[loop].y);
@@ -292,8 +299,8 @@ void perform_clustering() {
     int end;
     int nb_dynamic = 0;// to count the number of hits of the current cluster that are dynamic
 
-    // graphical display of the start of the current cluster in green
-    if (false)
+    // graphical display of the start of the current cluster in `green`
+    if (SHOW_CLUSTERS)
     {
         display[nb_pts] = current_scan[start];
 
@@ -329,8 +336,8 @@ void perform_clustering() {
             cluster_size[nb_cluster] = distancePoints(current_scan[start], current_scan[end]);
             /////////////////////////////////////////////////////////
 
-            // graphical display of the end of the current cluster in red
-            if (true) 
+            // graphical display of the end of the current cluster in `red`
+            if (SHOW_CLUSTERS) 
             {
                 display[nb_pts] = current_scan[end];
 
@@ -367,8 +374,8 @@ void perform_clustering() {
             middle.y = middle_y;
 
             // graphical display of the middle of the current cluster in
-            // These are displayed in red pink almost white
-            if (true)
+            // These are displayed in `red pink almost white`
+            if (SHOW_CLUSTERS)
             {
                 display[nb_pts] = middle;
 
@@ -391,8 +398,8 @@ void perform_clustering() {
             nb_dynamic = 0;
 
             // graphical display of the start of the current cluster in
-            // These are displayed in green
-            if (true)
+            // These are displayed in `green`
+            if (SHOW_CLUSTERS)
             {
                 display[nb_pts] = current_scan[start];
 
@@ -453,7 +460,7 @@ void detect_legs() {
                     // graphical display of the detected dynamic leg in yellow
                     for (int loop2 = 0; loop2 < nb_beams; loop2++)
                     {
-                        if (cluster[loop2] == loop)
+                        if (SHOW_DYNAMIC_LEGS && cluster[loop2] == loop)
                         {
                             // dynamic legs are yellow
                             display[nb_pts] = current_scan[loop2];
@@ -472,7 +479,7 @@ void detect_legs() {
                     // graphical display of the detected static leg in white
                     for (int loop2 = 0; loop2 < nb_beams; loop2++)
                     {
-                        if (cluster[loop2] == loop)
+                        if (SHOW_STATIC_LEGS && cluster[loop2] == loop)
                         {
                             // static legs are white
                             display[nb_pts] = current_scan[loop2];
@@ -560,7 +567,7 @@ void detect_persons() {
                         person_dynamic[nb_persons_detected] = false;
                     }
 
-                    if (person_dynamic[nb_persons_detected])
+                    if (SHOW_DYNAMIC_PERSONS && person_dynamic[nb_persons_detected])
                     {
                         nb_moving_persons++;
                         ROS_INFO("moving person detected: leg[%i]+leg[%i] -> (%f,%f) ", loop_leg1, loop_leg2, person_detected[nb_persons_detected].x,
@@ -577,7 +584,7 @@ void detect_persons() {
 
                         nb_pts++;
                     }
-                    else
+                    else if (SHOW_STATIC_PERSONS && !person_dynamic[nb_persons_detected])
                     {
                         ROS_INFO("static person detected: leg[%i]+leg[%i] -> (%f,%f)", loop_leg1, loop_leg2, person_detected[nb_persons_detected].x,
                                  person_detected[nb_persons_detected].y);
@@ -641,23 +648,27 @@ void detect_a_moving_person() {
             ROS_INFO("closest person detected: (%f,%f)", moving_person_tracked.x, moving_person_tracked.y);
             pub_datmo.publish(moving_person_tracked);
 
-            // display the closest moving person
-            display[nb_pts] = moving_person_tracked;
-            // These are displayed in BLUE
-            colors[nb_pts].r = 0;
-            colors[nb_pts].g = 0;
-            colors[nb_pts].b = 1;
-            colors[nb_pts].a = 1.0;
-            nb_pts++;
+            if (SHOW_TRACKED_PERSON) {
 
-            // display (0, 0) == robot position
-            display[nb_pts] = robot_position;
-            // These are displayed in BLUE DARK GREY
-            colors[nb_pts].r = 0.2;
-            colors[nb_pts].g = 0.2;
-            colors[nb_pts].b = 0.5;
-            colors[nb_pts].a = 1.0;
-            nb_pts++;
+                // display the closest moving person
+                display[nb_pts] = moving_person_tracked;
+                // These are displayed in BLUE
+                colors[nb_pts].r = 0;
+                colors[nb_pts].g = 0;
+                colors[nb_pts].b = 1;
+                colors[nb_pts].a = 1.0;
+                nb_pts++;
+            }
+            if (SHOW_ROBOT_POSITION) {
+                // display (0, 0) == robot position
+                display[nb_pts] = robot_position;
+                // These are displayed in BLUE DARK GREY
+                colors[nb_pts].r = 0.2;
+                colors[nb_pts].g = 0.2;
+                colors[nb_pts].b = 0.5;
+                colors[nb_pts].a = 1.0;
+                nb_pts++;
+            }
         }
 
         // ROS_INFO("detecting a moving person done");
