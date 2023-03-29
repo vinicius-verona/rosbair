@@ -118,7 +118,8 @@ add_executable(datmo_node src/datmo_node.cpp)
 add_executable(action_node src/action_node.cpp)
 add_executable(obstacle_detection_node src/obstacle_detection_node.cpp)
 add_executable(robot_moving_node src/robot_moving_node.cpp)
-add_executable(localization_node src/localization_node.cpp)
+# add_executable(localization_node src/localization_node.cpp)
+# add_executable(sensor_model_node src/sensor_model_node.cpp)
 
 ## Add cmake target dependencies of the executable/library
 ## as an example, message headers may need to be generated before nodes
@@ -131,7 +132,8 @@ target_link_libraries(datmo_node ${catkin_LIBRARIES})
 target_link_libraries(action_node ${catkin_LIBRARIES})
 target_link_libraries(obstacle_detection_node ${catkin_LIBRARIES})
 target_link_libraries(robot_moving_node ${catkin_LIBRARIES})
-target_link_libraries(localization_node ${catkin_LIBRARIES})
+# target_link_libraries(localization_node ${catkin_LIBRARIES})
+# target_link_libraries(sensor_model_node ${catkin_LIBRARIES})
 
 #############
 ## Install ##
