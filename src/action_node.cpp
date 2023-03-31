@@ -223,12 +223,10 @@ void compute_translation()
     ROS_INFO("current_position: (%f, %f), initial_position: (%f, %f)", current_position.x, current_position.y, initial_position.x, initial_position.y);
     translation_done = distancePoints(current_position, initial_position); // OWN
     error_translation = translation_to_do - translation_done;  // OWN
-    // error_translation = clamp(translation_to_do - translation_done);  // OWN
 
     ROS_INFO("translation_to_do: %f, translation_done: %f, error_translation: %f", translation_to_do, translation_done, error_translation);
 
-    cond_translation = fabs(error_translation) > safety_distance; //cond_translation is used to control if we stop or not the pid for translation
-
+    cond_translation = fabs(error_translation) > error_translation_threshold; 
     if ( cond_translation )
     {
         //Implementation of a PID controller for translation_to_do;
