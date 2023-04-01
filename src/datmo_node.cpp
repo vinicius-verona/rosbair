@@ -162,13 +162,15 @@ void update() {
         // ROS_INFO("New data of robot_moving received");
 
         if ( !current_robot_moving ) {
-            //if the robot is not moving then we can perform moving person detection
-            //DO NOT FORGET to store the background but when ???
             ROS_INFO("robot is not moving");
             if (!stored_background)
             {
                 store_background();
                 stored_background = true;
+            }
+            else
+            {
+                detect_motion();
             }
         }
         else
