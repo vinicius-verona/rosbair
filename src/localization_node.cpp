@@ -210,7 +210,7 @@ public:
                     {
                         int score_current = sensor_model(loop_x, loop_y, o);
                         ROS_INFO("(%f, %f, %f): score = %i", loop_x, loop_y, o * 180 / M_PI, score_current);
-                        populateMarkerTopic();
+                        // populateMarkerTopic();
                         // ROS_INFO("press enter to continue");
                         // getchar();
 
@@ -227,6 +227,9 @@ public:
             }
         }
 
+        sensor_model(estimated_position.x, estimated_position.y, estimated_orientation);
+        populateMarkerTopic();
+        ROS_INFO("(%f, %f, %f): MAX score = %i", estimated_position.x, estimated_position.y, estimated_orientation * 180 / M_PI, score_max);
         ROS_INFO("initialize localization done");
 
     } // initialize_localization
@@ -301,7 +304,7 @@ public:
                     {
                         int score_current = sensor_model(loop_x, loop_y, o);
                         ROS_INFO("(%f, %f, %f): score = %i", loop_x, loop_y, o * 180 / M_PI, score_current);
-                        populateMarkerTopic();
+                        // populateMarkerTopic();
                         // ROS_INFO("press enter to continue");
                         // getchar();
 
@@ -318,6 +321,9 @@ public:
             }
         }
 
+        sensor_model(estimated_position.x, estimated_position.y, estimated_orientation);
+        populateMarkerTopic();
+        ROS_INFO("(%f, %f, %f): MAX score = %i", estimated_position.x, estimated_position.y, estimated_orientation * 180 / M_PI, score_max);
         ROS_INFO("estimate_position done");
     }
 
