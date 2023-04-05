@@ -170,8 +170,8 @@ public:
         int score_max = sensor_model(initial_position.x, initial_position.y, initial_orientation);
         ROS_INFO("initial_position(%f, %f, %f): score = %i", initial_position.x, initial_position.y, initial_orientation * 180 / M_PI, score_max);
         populateMarkerTopic();
-        ROS_INFO("press enter to continue");
-        getchar();
+        // ROS_INFO("press enter to continue");
+        // getchar();
 
         odom_last = odom_current;
         odom_last_orientation = odom_current_orientation;
@@ -209,7 +209,7 @@ public:
                     if (cell_value(loop_x, loop_y) == 0) // robair can only be at a free cell
                     {
                         int score_current = sensor_model(loop_x, loop_y, o);
-                        ROS_INFO("(%f, %f, %f): score = %i", loop_x, loop_y, o * 180 / M_PI, score_current);
+                        // ROS_INFO("(%f, %f, %f): score = %i", loop_x, loop_y, o * 180 / M_PI, score_current);
                         // populateMarkerTopic();
                         // ROS_INFO("press enter to continue");
                         // getchar();
@@ -266,8 +266,8 @@ public:
         int score_max = sensor_model(predicted_position.x, predicted_position.y, predicted_orientation);
         ROS_INFO("predicted position(%f, %f, %f): score = %i", predicted_position.x, predicted_position.y, predicted_orientation * 180 / M_PI, score_max);
         populateMarkerTopic();
-        ROS_INFO("press enter to continue");
-        getchar();
+        // ROS_INFO("press enter to continue");
+        // getchar();
 
         // estimation of the positions closed to the predicted_position
         float min_x, max_x, min_y, max_y, min_orientation, max_orientation;
@@ -303,7 +303,7 @@ public:
                     if (cell_value(loop_x, loop_y) == 0) // robair can only be at a free cell
                     {
                         int score_current = sensor_model(loop_x, loop_y, o);
-                        ROS_INFO("(%f, %f, %f): score = %i", loop_x, loop_y, o * 180 / M_PI, score_current);
+                        // ROS_INFO("(%f, %f, %f): score = %i", loop_x, loop_y, o * 180 / M_PI, score_current);
                         // populateMarkerTopic();
                         // ROS_INFO("press enter to continue");
                         // getchar();
