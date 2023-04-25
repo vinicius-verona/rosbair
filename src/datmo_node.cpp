@@ -26,7 +26,7 @@
 //used for detection of leg
 #define leg_size_min 0.05
 #define leg_size_max 0.25
-#define legs_distance_min 0.1 // Added by the students
+// #define legs_distance_min 0.1 // Added by the students
 #define legs_distance_max 0.7
 
 //used for frequency
@@ -111,9 +111,12 @@ private:
     int frequency;
 
     // GRAPHICAL DISPLAY
-    int nb_pts;
-    geometry_msgs::Point display[1000];
-    std_msgs::ColorRGBA colors[1000];
+    int nb_pts = 0;
+    #define MAX_NB_PTS 1000
+    // increase capacity if you want to display more points (marker history)
+    // and comment out the nb_pts = 0 line
+    geometry_msgs::Point display[MAX_NB_PTS];
+    std_msgs::ColorRGBA colors[MAX_NB_PTS];
 
 public:
 
@@ -124,6 +127,7 @@ datmo_node() {
 
     // communication with action
     pub_datmo = n.advertise<geometry_msgs::Point>("goal_to_reach", 1);     // Preparing a topic to publish the goal to reach.
+    // ^^^ TODO project: topic published should be "person_position"
 
     pub_datmo_marker = n.advertise<visualization_msgs::Marker>("datmo_marker", 1); // Preparing a topic to publish our results. This will be used by the visualization tool rviz
 
@@ -154,15 +158,14 @@ void update() {
     // we wait for new data of the laser and of the robot_moving_node to perform laser processing
     if ( init_laser && init_robot ) {
 
+        // nb_pts = nb_pts % (MAX_NB_PTS - 200); // to avoid overflow
         nb_pts = 0;
 
         init_laser = false;
-        ROS_INFO("\n");
         // ROS_INFO("New data of laser received");
         // ROS_INFO("New data of robot_moving received");
 
         if ( !current_robot_moving ) {
-            ROS_INFO("robot is not moving");
             if (!stored_background)
             {
                 store_background();
@@ -185,7 +188,7 @@ void update() {
         // when moving or not:
         perform_clustering();//to perform clustering
         detect_legs();//to detect moving legs using cluster
-        detect_persons();//to detect moving_person using moving legs detected
+        detect_persons(); //to detect moving_person using moving legs detected
 
         if (tracking_mode)
         {
@@ -195,15 +198,11 @@ void update() {
         {   
             if ( !current_robot_moving )
             {
-                detect_a_moving_person();
+                detect_a_moving_person();  
             }
         }
 
         previous_robot_moving = current_robot_moving;
-
-
-        // When do we do detection and when do we do tracking ?
-        track_a_moving_person();
 
         //graphical display of the results
         populateMarkerTopic();
@@ -243,7 +242,7 @@ void reset_motion() {
 
 void detect_motion() {
 
-    ROS_INFO("detecting motion");
+    // ROS_INFO("detecting motion");
     for (int loop = 0; loop < nb_beams; loop++)
     {
         // loop over all the hits
@@ -251,10 +250,10 @@ void detect_motion() {
         //  r ) is higher than "detection_threshold"
         float diff = fabs(background[loop] - r[loop]);
 
-        if (diff > detection_threshold * (1 + 0.2 * fabs(background[loop]))) // remember change from assignment here, 20cm at 0m, 40cm at 5m
+        if (diff > detection_threshold * (1 + 0.2 * fabs(background[loop]))) //      // remember change from assignment here, 20cm at 0m, 40cm at 5m
         {
             dynamic[loop] = true; // the current hit is dynamic
-            ROS_INFO("motion detected");
+            // ROS_INFO("motion detected");
         }
         else
         {
@@ -264,8 +263,8 @@ void detect_motion() {
         // Dynamic hits are displayed in `blue`
         if (SHOW_DYNAMIC_HITS && dynamic[loop])
         {
-            ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
-                        current_scan[loop].x, current_scan[loop].y);
+            // ROS_INFO("hit[%i](%f, %f) is dynamic", loop,
+                        // current_scan[loop].x, current_scan[loop].y);
 
             // display in blue of hits that are dynamic
             display[nb_pts] = current_scan[loop];
@@ -279,7 +278,7 @@ void detect_motion() {
         }
     }
 
-    ROS_INFO("motion detected");
+    // ROS_INFO("motion detected");
 
 }//detect_motion
 
@@ -322,6 +321,11 @@ void perform_clustering() {
         // one is higher than "cluster_threshold"
         float points_dist = distancePoints(current_scan[loop], current_scan[loop - 1]);
 
+        if (dynamic[loop])
+        {
+            nb_dynamic++;
+        }
+
         if (points_dist > cluster_threshold || loop == nb_beams - 1)
         {
             // last cluster -> end the current cluster with the current hit
@@ -342,7 +346,7 @@ void perform_clustering() {
             if (SHOW_CLUSTERS) 
             {
                 display[nb_pts] = current_scan[end];
-
+                
                 colors[nb_pts].r = 1;
                 colors[nb_pts].g = 0;
                 colors[nb_pts].b = 0;
@@ -353,11 +357,6 @@ void perform_clustering() {
             // compute the middle of the cluster
             middle_x = 0;
             middle_y = 0;
-
-            if (dynamic[loop])
-            {
-                nb_dynamic++;
-            }
 
             for (int j = start; j <= end; j++)
             {
@@ -390,8 +389,7 @@ void perform_clustering() {
 
             cluster_middle[nb_cluster] = middle;
             cluster_dynamic[nb_cluster] =
-                100 * (int)((double)(nb_dynamic) /
-                            (double)(abs(end - start) + 1)); //  % of dynamic points
+                (int)(100 * ((double)(nb_dynamic) / (end - start + 1))); //  % of dynamic points
                                                                 //  within a cluster
 
             // the current hit is the start of the next cluster
@@ -414,10 +412,23 @@ void perform_clustering() {
 
             cluster_count[nb_cluster] = current_cluster_count;
 
-
             // increase cluster number
             nb_cluster++;
         }
+
+        // Show color-coded clusters - choose a condition to append: 
+        // && dynamic[loop]
+        // && 
+        // if (SHOW_CLUSTERS_COLORCODED) 
+        // {
+        //     display[nb_pts] = current_scan[loop];
+            
+        //     colors[nb_pts].r = nb_cluster & 1;
+        //     colors[nb_pts].g = nb_cluster >> 1 & 1;
+        //     colors[nb_pts].b = nb_cluster >> 2 & 1;
+        //     colors[nb_pts].a = 0.15;
+        //     nb_pts++;
+        // }
 
         cluster[loop] = nb_cluster;
     }
@@ -438,7 +449,6 @@ void detect_legs() {
         // ROS_INFO("detecting legs");
         nb_legs_detected = 0;
 
-        nb_pts = 0;
         int sum_cluster_counts = 0;
         for (int loop = 0; loop < nb_cluster; loop++)
         {
@@ -453,6 +463,9 @@ void detect_legs() {
                 leg_detected[nb_legs_detected] = cluster_middle[loop];
                 leg_cluster[nb_legs_detected]  = loop;
                 leg_dynamic[nb_legs_detected]  = (cluster_dynamic[loop] >= 75);
+                
+                // print cluster_dynamic[loop]
+                // ROS_INFO("%i: %i", loop, cluster_dynamic[loop]);
 
                 // leg cluster will contain the ID of the cluster
                 // in cluster_middle[ID] there is the center of this leg cluster
@@ -498,8 +511,6 @@ void detect_legs() {
 
                 nb_legs_detected++;
             }
-
-            // nb_pts++; // Removed during tracking
         }
 
         if (nb_legs_detected)
@@ -538,10 +549,9 @@ void detect_persons() {
                 auto leg2_middle = cluster_middle[leg_cluster[loop_leg2]]; // == leg_detected[loop_leg2] // hopefully
                 float dist = distancePoints(leg1_middle, leg2_middle);
                 // ROS_INFO("distance between legs %d and %d: %f", loop_leg1, loop_leg2, dist);
-                if (dist < legs_distance_max && dist > legs_distance_min)
+                if (dist < legs_distance_max)  //  && dist > legs_distance_min
                 {
-                    // legs_used.insert(loop_leg1);  // assumption: not necessary, since we increase
-                    //                                  loop_leg1 variable when a person is found.
+
                     legs_used.insert(loop_leg2);
 
                     // Compute the middle of the person
@@ -555,7 +565,6 @@ void detect_persons() {
                     geometry_msgs::Point middle = {};
                     middle.x = middle_x;
                     middle.y = middle_y;
-                    middle.z = middle_z;
 
                     person_detected[nb_persons_detected] = middle;
 
@@ -575,28 +584,28 @@ void detect_persons() {
                         ROS_INFO("moving person detected: [%i] + [%i] -> (%f,%f) ", loop_leg1, loop_leg2, person_detected[nb_persons_detected].x,
                                  person_detected[nb_persons_detected].y);
 
-                        ROS_INFO("^ made up of [%f, %f], [%f, %f]", leg1_middle.x, leg1_middle.y, leg2_middle.x, leg2_middle.y);
+                        // ROS_INFO("^ made up of [%f, %f], [%f, %f]", leg1_middle.x, leg1_middle.y, leg2_middle.x, leg2_middle.y);
                         // a moving person detected is green
                         display[nb_pts] = person_detected[nb_persons_detected];
 
                         colors[nb_pts].r = 0.2;
                         colors[nb_pts].g = 0.8;
                         colors[nb_pts].b = 0.2;
-                        colors[nb_pts].a = 1.0;
+                        colors[nb_pts].a = 0.3;
 
                         nb_pts++;
                     }
                     else if (SHOW_STATIC_PERSONS && !person_dynamic[nb_persons_detected])
                     {
-                        ROS_INFO("static person detected: [%i] + [%i] -> (%f,%f)", loop_leg1, loop_leg2, person_detected[nb_persons_detected].x,
-                                 person_detected[nb_persons_detected].y);
+                        // ROS_INFO("static person detected: [%i] + [%i] -> (%f,%f)", loop_leg1, loop_leg2, person_detected[nb_persons_detected].x,
+                                //  person_detected[nb_persons_detected].y);
                         // a static person detected is red
                         display[nb_pts] = person_detected[nb_persons_detected];
 
                         colors[nb_pts].r = 0.8;
                         colors[nb_pts].g = 0.2;
                         colors[nb_pts].b = 0.2;
-                        colors[nb_pts].a = 1.0;
+                        colors[nb_pts].a = 0.3;
 
                         nb_pts++;
                     }
@@ -611,7 +620,7 @@ void detect_persons() {
 
         if (nb_persons_detected)
         {
-            ROS_INFO("%d/%d moving/persons detected.\n", nb_moving_persons, nb_persons_detected);
+            // ROS_INFO("%d/%d moving/persons detected.\n", nb_moving_persons, nb_persons_detected);
         }
 
         num_persons_detected.push_back(nb_persons_detected);
@@ -631,6 +640,9 @@ void detect_a_moving_person() {
         robot_position.y = 0;
         robot_position.z = 0;
 
+        // vector of distances
+        std::vector<float> distances(nb_persons_detected);
+
         for (int loop = 0; loop < nb_persons_detected; loop++)
         {
             if (person_dynamic[loop])
@@ -641,34 +653,26 @@ void detect_a_moving_person() {
                     distance_closest = distance;
                     idx_closest = loop;
                 }
+                distances.push_back(distance);
             }
         }
 
         if (idx_closest != -1)
         {
-            moving_person_tracked = person_detected[idx_closest];
-            ROS_INFO("closest person detected: (%f,%f)", moving_person_tracked.x, moving_person_tracked.y);
-            pub_datmo.publish(moving_person_tracked);
+            geometry_msgs::Point moving_person_detected = person_detected[idx_closest];
+            ROS_INFO("closest moving: (%f,%f)", moving_person_detected.x, moving_person_detected.y);
+            pub_datmo.publish(moving_person_detected);  // start following the closest moving person (not run while tracking)
+            tracking_mode = true;
 
             if (SHOW_TRACKED_PERSON) {
 
                 // display the closest moving person
-                display[nb_pts] = moving_person_tracked;
-                // These are displayed in BLUE
+                display[nb_pts] = moving_person_detected;
+                // These are displayed in BLUE -- note: won't be shown during tracking but only on first detection
                 colors[nb_pts].r = 0;
-                colors[nb_pts].g = 0;
-                colors[nb_pts].b = 1;
-                colors[nb_pts].a = 1.0;
-                nb_pts++;
-            }
-            if (SHOW_ROBOT_POSITION) {
-                // display (0, 0) == robot position
-                display[nb_pts] = robot_position;
-                // These are displayed in BLUE DARK GREY
-                colors[nb_pts].r = 0.2;
                 colors[nb_pts].g = 0.2;
-                colors[nb_pts].b = 0.5;
-                colors[nb_pts].a = 1.0;
+                colors[nb_pts].b = 1;
+                colors[nb_pts].a = 0.4;
                 nb_pts++;
             }
         }
@@ -693,25 +697,21 @@ void track_a_moving_person() {
         // ROS_INFO("distance with [%i] = %f", loop_detection, current_dist);
         if (  current_dist < distance_min ) {
             // we store the info about the closest detection
-            ROS_INFO("tracking person: %i", loop_detection);
             distance_min = current_dist;
             index_min = loop_detection;
             associated = true;
         }
     }
 
-    // nb_pts -= nb_persons_detected; // TODO CHECK why decreased: run with, without; compare
-
     if ( associated )
     {
         // if the moving_person_tracked has been associated how we update moving_person_tracked, frequency and uncertainty
         moving_person_tracked = person_detected[index_min];  // update the position of the moving person
-        pub_datmo.publish(moving_person_tracked);
+        pub_datmo.publish(moving_person_tracked);  // DEBUG
         frequency = std::min(frequency + 1, frequency_max);
         uncertainty = std::max(uncertainty - uncertainty_inc, uncertainty_min);
-        tracking_mode = true;
 
-        ROS_INFO("moving_person_tracked: (%f, %f), %i, %f", moving_person_tracked.x,
+        ROS_INFO("moving, tracked: (%f, %f), %i, %f", moving_person_tracked.x,
                                                             moving_person_tracked.y,
                                                             frequency,
                                                             uncertainty);
@@ -721,16 +721,16 @@ void track_a_moving_person() {
             display[nb_pts] = moving_person_tracked;
 
             colors[nb_pts].r = 0;
-            colors[nb_pts].g = 1;
-            colors[nb_pts].b = 0;
-            colors[nb_pts].a = 1.0;
+            colors[nb_pts].g = 0.2;
+            colors[nb_pts].b = 1;
+            colors[nb_pts].a = 0.4;
 
             nb_pts++;
         }
     }
     else {
         // if the moving_person_tracked has not been associated how we update moving_person_tracked, frequency and uncertainty
-        ROS_INFO("moving_person_tracked: (%f, %f), %i, %f", moving_person_tracked.x,
+        ROS_INFO("tracking lost, last seen at: (%f, %f), %i, %f", moving_person_tracked.x,
                                                             moving_person_tracked.y,
                                                             frequency,
                                                             uncertainty);
@@ -744,7 +744,9 @@ void track_a_moving_person() {
             moving_person_tracked.x = 0;
             moving_person_tracked.y = 0;
             // publish robot's position as the tracked one
-            pub_datmo.publish(moving_person_tracked);
+            pub_datmo.publish(moving_person_tracked);  // makes the robot stop moving
+
+            // note: no marker is created here
         }
     }
 
