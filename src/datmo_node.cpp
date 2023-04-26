@@ -675,6 +675,10 @@ public:
             pub_datmo.publish(moving_person_detected); // start following the closest moving person (not run while tracking)
             tracking_mode = true;
 
+            // reset frenquency and uncertainty
+            frequency = frequency_init;
+            uncertainty = uncertainty_min;
+
             if (SHOW_TRACKED_PERSON)
             {
 
